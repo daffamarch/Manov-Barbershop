@@ -45,7 +45,19 @@ type OwnerInsightsData = {
 }
 
 export function DashboardClient({ initialData }: { initialData: Feedback[] }) {
-  const [dataList, setDataList] = React.useState<Feedback[]>(initialData)
+  const [dataList, setDataList] = React.useState<Feedback[]>(() => {
+    if (typeof window === "undefined") return initialData
+    try {
+      const saved = localStorage.getItem("ratebridge_deleted_ids")
+      if (saved) {
+        const deletedIds: string[] = JSON.parse(saved)
+        if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+          return initialData.filter((item) => !deletedIds.includes(item.id))
+        }
+      }
+    } catch (e) {}
+    return initialData
+  })
   const [filter, setFilter] = React.useState<"all" | "positive" | "negative">("all")
 
   // Update dataList when initialData changes & filter out locally deleted IDs
@@ -153,11 +165,8 @@ export function DashboardClient({ initialData }: { initialData: Feedback[] }) {
       console.error("Error saving deleted ids:", e)
     }
 
-    idsToDelete.forEach((id) => {
-      if (!id.startsWith("demo-")) {
-        deleteFeedbackAction(id).catch((err) => console.error("Error bulk delete Supabase:", err))
-      }
-    })
+    // Persist deleted IDs in server cookies + localStorage
+    deleteFeedbackAction(idsToDelete).catch((err) => console.error("Error bulk delete server action:", err))
 
     setDataList((prev) => prev.filter((item) => !selectedIds.has(item.id)))
     setSelectedIds(new Set())
@@ -324,13 +333,11 @@ export function DashboardClient({ initialData }: { initialData: Feedback[] }) {
       console.error("Error saving deleted id:", e)
     }
 
-    // Attempt Supabase deletion in background
-    if (!idToDelete.startsWith("demo-")) {
-      try {
-        await deleteFeedbackAction(idToDelete)
-      } catch (err) {
-        console.error("Error delete dari Supabase:", err)
-      }
+    // Attempt deletion & save in server cookie
+    try {
+      await deleteFeedbackAction(idToDelete)
+    } catch (err) {
+      console.error("Error delete server action:", err)
     }
 
     // Remove from UI state & close modal

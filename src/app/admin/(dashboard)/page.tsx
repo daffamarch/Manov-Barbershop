@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import { DashboardClient } from "./DashboardClient"
 import { AlertTriangle } from "lucide-react"
+import { cookies } from "next/headers"
 
 export const dynamic = "force-dynamic"
 
@@ -11,7 +12,7 @@ const SAMPLE_DEMO_FEEDBACKS = [
     kebersihan: 2,
     rasa: 1,
     pelayanan: 1,
-    comment: "Makanan dingin, kebersihan meja kurang dijaga, dan mas pelayan kurang ramah pas dipanggil.",
+    comment: "Kebersihan tempat kurang dijaga, dan barbershop terasa kurang rapi pas dipanggil.",
     customer_contact: "081234567890",
     created_at: new Date().toISOString(),
   },
@@ -21,7 +22,7 @@ const SAMPLE_DEMO_FEEDBACKS = [
     kebersihan: 3,
     rasa: 2,
     pelayanan: 2,
-    comment: "Pesanan cukup lama datang hampir 40 menit, dan jus alpukat rasanya agak kepahitan.",
+    comment: "Antrean cukup lama hampir 40 menit, dan hasil cukur bagian samping agak kurang simetris.",
     customer_contact: "085712345678",
     created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
   },
@@ -31,7 +32,7 @@ const SAMPLE_DEMO_FEEDBACKS = [
     kebersihan: 4,
     rasa: 3,
     pelayanan: 3,
-    comment: "Rasa makanan tergolong standar, namun suasana restoran dan kebersihannya lumayan bagus.",
+    comment: "Hasil cukur tergolong standar, namun suasana barbershop dan kebersihannya lumayan bagus.",
     customer_contact: "089612345678",
     created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
   },
@@ -41,7 +42,7 @@ const SAMPLE_DEMO_FEEDBACKS = [
     kebersihan: 5,
     rasa: 5,
     pelayanan: 5,
-    comment: "Sangat puas! Ayam gorengnya renyah dan pelayanan sangat ramah.",
+    comment: "Sangat puas! Cukuran sangat rapi dan pelayanan barber sangat ramah.",
     customer_contact: "081987654321",
     created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
   },
@@ -69,6 +70,23 @@ export default async function AdminDashboardPage() {
     errorMessage = err?.message || "TypeError: fetch failed"
   }
 
+  // Filter out deleted IDs stored in server cookies so deleted items never return on refresh or relog
+  const cookieStore = await cookies()
+  const deletedCookie = cookieStore.get("ratebridge_deleted_ids")?.value
+  let deletedIds: string[] = []
+  if (deletedCookie) {
+    try {
+      deletedIds = JSON.parse(deletedCookie)
+    } catch (e) {
+      deletedIds = []
+    }
+  }
+
+  const rawList = data !== null ? data : SAMPLE_DEMO_FEEDBACKS
+  const filteredData = Array.isArray(deletedIds) && deletedIds.length > 0
+    ? rawList.filter((item: any) => !deletedIds.includes(item.id))
+    : rawList
+
   return (
     <div className="w-full space-y-6">
       {isOffline && (
@@ -79,7 +97,7 @@ export default async function AdminDashboardPage() {
             <p className="text-amber-800 text-xs">
               Project Supabase (<code className="bg-amber-100 px-1 py-0.5 rounded text-amber-900">qlwcmkodpcgrwsybktsz</code>)
               kemungkinan sedang di-pause otomatis oleh Supabase karena inaktivitas (Error: <i>{errorMessage}</i>).
-              Menampilkan data demo ulasan agar Anda tetap dapat menguji fitur <b>Follow-Up WhatsApp Saran AI</b> secara langsung di browser.
+              Menampilkan data ulasan agar Anda tetap dapat menguji fitur <b>Follow-Up WhatsApp Saran AI</b> secara langsung di browser.
             </p>
             <p className="text-xs text-amber-700 font-medium pt-1">
               💡 Untuk mengaktifkan kembali database Supabase: Silakan masuk ke Dashboard Supabase Anda (supabase.com/dashboard) dan klik tombol <b>Restore / Unpause project</b>.
@@ -92,7 +110,7 @@ export default async function AdminDashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dasbor Manajemen</h1>
       </div>
 
-      <DashboardClient initialData={data !== null ? data : SAMPLE_DEMO_FEEDBACKS} />
+      <DashboardClient initialData={filteredData} />
     </div>
   )
 }
