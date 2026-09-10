@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RateBridge",
-  description: "Bantu kami menjadi lebih baik dengan ulasan Anda",
+  title: "Manov Barbershop - Ulasan & Kepuasan Pelanggan",
+  description: "Bantu Manov Barbershop menjadi lebih baik dengan ulasan Anda",
 };
 
 export default function RootLayout({

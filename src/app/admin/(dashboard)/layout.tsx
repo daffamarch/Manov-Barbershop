@@ -19,9 +19,9 @@ export default async function AdminLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-bold text-sm">
-              RB
+              MB
             </div>
-            <span className="font-semibold text-gray-900">RateBridge Admin</span>
+            <span className="font-semibold text-gray-900">Manov Barbershop Admin</span>
           </div>
           {/* A small logout button could go here if implemented on client */}
         </div>

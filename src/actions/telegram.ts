@@ -26,19 +26,19 @@ export async function sendTelegramNotification(payload: {
   let waLink = "";
   
   if (payload.customer_contact && /\d/.test(payload.customer_contact)) {
-    const cleanNum = payload.customer_contact.replace(/\D/g, '');
-    const finalNum = cleanNum.startsWith('0') ? '62' + cleanNum.slice(1) : cleanNum;
-    waLink = `\n\n🟢 <a href="https://wa.me/${finalNum}?text=Halo, kami dari manajemen RateBridge. Kami menerima masukan Anda...">Hubungi Pelanggan via WA</a>`;
+    const cleanNum = payload.customer_contact.replace(/\D/g, '')
+    const finalNum = cleanNum.startsWith('0') ? '62' + cleanNum.slice(1) : cleanNum
+    waLink = `\n\n🟢 <a href="https://wa.me/${finalNum}?text=Halo, kami dari manajemen Manov Barbershop. Kami menerima masukan Anda...">Hubungi Pelanggan via WA</a>`
   }
 
   const message = `
-🚨 <b>KOMPLAIN BARU: RateBridge</b>
+🚨 <b>KOMPLAIN BARU: Manov Barbershop</b>
 ⭐ <b>Rating Total: ${payload.rating}/5</b>
 
 📊 <b>Detail Penilaian:</b>
 🧹 Kebersihan: ${payload.kebersihan}/5
-🍽️ Rasa: ${payload.rasa}/5
-👤 Pelayanan: ${payload.pelayanan}/5
+✂️ Hasil Potongan: ${payload.rasa}/5
+👤 Pelayanan Barber: ${payload.pelayanan}/5
 
 💬 <b>Catatan:</b>
 <i>"${payload.comment || 'Tidak ada catatan'}"</i>
@@ -46,10 +46,13 @@ export async function sendTelegramNotification(payload: {
 📱 <b>Kontak:</b> ${contactValue}${waLink}
 
 🕒 <b>Jam Kirim:</b> ${currentTime} WIB
-📅 <i>Dikirim secara anonim oleh RateBridge</i>
-  `.trim();
+📅 <i>Dikirim secara anonim untuk Manov Barbershop</i>
+  `.trim()
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout max
+
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -58,7 +61,9 @@ export async function sendTelegramNotification(payload: {
         text: message,
         parse_mode: "HTML",
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const result = await response.json();
     if (!result.ok) {

@@ -43,16 +43,17 @@ export function FeedbackFlow() {
         const checkTime = new Date()
         checkTime.setHours(checkTime.getHours() - 24)
 
-        const { data, error } = await supabase
-          .from("feedbacks")
-          .select("id")
-          .eq("visitor_id", vid)
-          .gt("created_at", checkTime.toISOString())
-          .limit(1)
+        // SEMENTARA DINONAKTIFKAN UNTUK TESTING (Bypass 24 jam anti-spam)
+        // const { data, error } = await supabase
+        //   .from("feedbacks")
+        //   .select("id")
+        //   .eq("visitor_id", vid)
+        //   .gt("created_at", checkTime.toISOString())
+        //   .limit(1)
 
-        if (data && data.length > 0) {
-          setFlowState("already_voted")
-        }
+        // if (data && data.length > 0) {
+        //   setFlowState("already_voted")
+        // }
       } catch (err) {
         console.error("Anti-spam failed:", err)
       } finally {
@@ -62,10 +63,16 @@ export function FeedbackFlow() {
     initAntiSpam()
   }, [])
 
-  const handleRatingSelect = async (selectedRating: number) => {
+  const handleRatingSelect = (selectedRating: number) => {
     setRating(selectedRating)
-    const savedId = await saveToDatabase(selectedRating, "")
-    if (savedId) setLastInsertedId(savedId)
+
+    // Untuk rating positif (4/5), otomatis set sub-metric setara rating
+    const defaultSubs = selectedRating > 3 ? { keb: selectedRating, ras: selectedRating, pel: selectedRating } : undefined
+
+    // Save initial entry in background without blocking screen transition
+    saveToDatabase(selectedRating, "", defaultSubs).then((savedId) => {
+      if (savedId) setLastInsertedId(savedId)
+    }).catch((err) => console.error("Initial save error:", err))
 
     if (selectedRating <= 3) {
       setFlowState("complaint")
@@ -127,26 +134,28 @@ export function FeedbackFlow() {
   }
 
   const handleComplaintSubmit = async () => {
-    if (!comment.trim()) return
     setIsSubmitting(true)
 
-    const calculatedAvgRating = Math.round((kebersihan + rasa + pelayanan) / 3) || rating
+    // Gunakan rating awal kecuali user mengisi ketiga sub-metric
+    const validSubs = [kebersihan, rasa, pelayanan].filter((v) => v > 0)
+    const finalRating = validSubs.length === 3 ? Math.round((kebersihan + rasa + pelayanan) / 3) : rating
     
     await saveToDatabase(
-      calculatedAvgRating, 
+      finalRating, 
       comment, 
       { keb: kebersihan, ras: rasa, pel: pelayanan },
       customerContact
     )
 
-    await sendTelegramNotification({
-      rating: calculatedAvgRating,
+    // Kirim notifikasi Telegram secara asynchronous agar UI langsung sukses
+    sendTelegramNotification({
+      rating: finalRating,
       kebersihan,
       rasa,
       pelayanan,
       comment,
       customer_contact: customerContact
-    })
+    }).catch((err) => console.error("Telegram error:", err))
 
     setIsSubmitting(false)
     setFlowState("success")
@@ -154,7 +163,7 @@ export function FeedbackFlow() {
 
   const handleAppreciationSubmit = async () => {
     setIsSubmitting(true)
-    await saveToDatabase(rating, "")
+    await saveToDatabase(rating, "", { keb: rating, ras: rating, pel: rating })
     setIsSubmitting(false)
     window.location.href = googleMapsUrl
   }
@@ -227,9 +236,9 @@ export function FeedbackFlow() {
             </div>
 
             <div className="space-y-4 bg-gray-50 p-4 rounded-3xl border border-gray-100">
-              <DetailRow label="🧹 Kebersihan" value={kebersihan} onChange={setKebersihan} />
-              <DetailRow label="🍽️ Rasa Hidangan" value={rasa} onChange={setRasa} />
-              <DetailRow label="👤 Pelayanan" value={pelayanan} onChange={setPelayanan} />
+              <DetailRow label="🧹 Kebersihan & Tempat" value={kebersihan} onChange={setKebersihan} />
+              <DetailRow label="✂️ Hasil Potongan" value={rasa} onChange={setRasa} />
+              <DetailRow label="👤 Pelayanan Barber" value={pelayanan} onChange={setPelayanan} />
             </div>
 
             <div className="space-y-2">
@@ -257,7 +266,7 @@ export function FeedbackFlow() {
             <Button
               className="w-full group"
               size="lg"
-              disabled={isSubmitting || !comment.trim()}
+              disabled={isSubmitting}
               onClick={handleComplaintSubmit}
             >
               {isSubmitting ? "Mengirim..." : "Kirim Masukan"}
