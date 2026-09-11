@@ -161,10 +161,18 @@ export function FeedbackFlow() {
     setFlowState("success")
   }
 
-  const handleAppreciationSubmit = async () => {
-    setIsSubmitting(true)
-    await saveToDatabase(rating, "", { keb: rating, ras: rating, pel: rating })
-    setIsSubmitting(false)
+  const handleAppreciationSubmit = () => {
+    saveToDatabase(rating, "", { keb: rating, ras: rating, pel: rating }).catch((err) =>
+      console.error("Save error:", err)
+    )
+    sendTelegramNotification({
+      rating,
+      kebersihan: rating,
+      rasa: rating,
+      pelayanan: rating,
+      comment: "Apresiasi Bintang " + rating + " (Google Maps)"
+    }).catch((err) => console.error("Telegram error:", err))
+
     window.location.href = googleMapsUrl
   }
 
