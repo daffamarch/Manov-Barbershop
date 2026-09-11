@@ -22,7 +22,7 @@ export default function AdminLogin() {
     try {
       const result = await loginAction(password)
       if (result.success) {
-        router.push("/admin")
+        window.location.href = "/admin"
       } else {
         setError(result.error || "Login gagal")
       }

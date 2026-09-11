@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - Staffpedia (Manov Barbershop)</title>
+    <!-- html2pdf Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .invoice-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 850px;
+            padding: 45px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e1e8ed;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #eef2f5;
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+        }
+
+        .brand-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #2563eb;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .invoice-badge {
+            background: #dcfce7;
+            color: #166534;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            border: 1px solid #bbf7d0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .info-box h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .info-box p {
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .table-container {
+            margin-bottom: 28px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .amount-col {
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .discount-row td {
+            color: #dc2626;
+        }
+
+        .total-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 32px;
+        }
+
+        .total-box {
+            width: 320px;
+            background: #f8fafc;
+            padding: 18px 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+            padding-top: 20px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .signature-title {
+            color: #64748b;
+            margin-bottom: 60px;
+            font-weight: 600;
+        }
+
+        .signature-name {
+            font-weight: 700;
+            color: #1e293b;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 6px;
+            display: inline-block;
+            min-width: 160px;
+        }
+
+        .footer {
+            border-top: 1px solid #eef2f5;
+            padding-top: 20px;
+            margin-top: 30px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-download-pdf {
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-download-pdf:hover {
+            background-color: #15803d;
+            transform: translateY(-1px);
+        }
+
+        .btn-print {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-print:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* PRINT MEDIA STYLES - PIXEL PERFECT FULL PAGE PDF */
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+            }
+            .invoice-card {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .actions {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-card" id="invoice-content">
+        <div class="header">
+            <div>
+                <div class="brand-title">STAFFPEDIA</div>
+                <div class="brand-subtitle">Faktur Pembayaran Layanan Website & Sistem Kartu Kepuasan Pelanggan</div>
+            </div>
+            <div>
+                <div class="invoice-badge">LUNAS / PAID</div>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <h4>Penyedia Layanan:</h4>
+                <p><strong>Staffpedia Digital</strong></p>
+                <p>Layanan Pengembangan Website & Sistem Usaha</p>
+            </div>
+            <div class="info-box" style="text-align: right;">
+                <h4>Ditujukan Kepada:</h4>
+                <p><strong>Manov Barbershop</strong></p>
+                <p><strong>No. Invoice:</strong> SP/INV/2026/001</p>
+                <p><strong>Tanggal:</strong> 9 September 2026</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Deskripsi Pekerjaan / Layanan Usaha</th>
+                        <th class="amount-col">Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>Pembuatan Website Kepuasan Pelanggan & Dashboard Usaha (Lengkap)</strong><br>
+                            <span style="font-size: 13px; color: #475569; display: block; margin-top: 6px; line-height: 1.6;">
+                                • <strong>Sistem Ulasan Digital:</strong> Halaman rating bintang untuk pelanggan (Ulasan positif otomatis diarahkan ke Google Maps Barbershop).<br>
+                                • <strong>Formulir Keluhan Pelanggan:</strong> Tempat masukan pelanggan untuk perbaikan kebersihan, hasil potongan, dan pelayanan.<br>
+                                • <strong>Dashboard Pemilik Usaha:</strong> Halaman khusus untuk melihat seluruh masukan pelanggan dan mengelola data ulasan.<br>
+                                • <strong>Asisten Pesan Otomatis:</strong> Fitur pembuat draf balasan WhatsApp dan rangkuman evaluasi usaha.
+                            </span>
+                        </td>
+                        <td class="amount-col">Rp 699.000</td>
+                    </tr>
+                    <tr class="discount-row">
+                        <td>
+                            <strong>Potongan Diskon Spesial Paket Usaha</strong><br>
+                            <span style="font-size: 12px; color: #ef4444;">Diskon penyesuaian khusus peluncuran sistem</span>
+                        </td>
+                        <td class="amount-col">- Rp 549.000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="total-section">
+            <div class="total-box">
+                <div class="total-row">
+                    <span>Total Pembayaran:</span>
+                    <span>Rp 150.000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tanda Tangan Section -->
+        <div class="signature-grid">
+            <div>
+                <p class="signature-title">Klien / Penerima Layanan</p>
+                <span class="signature-name">Manov Barbershop</span>
+            </div>
+            <div>
+                <p class="signature-title">Penyedia Layanan</p>
+                <span class="signature-name">Staffpedia</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Terima kasih atas kepercayaan Anda menggunakan layanan Staffpedia. Dokumen ini sah sebagai bukti pembayaran LUNAS.</p>
+        </div>
+
+        <div class="actions">
+            <button class="btn-print" onclick="window.print()">📄 Cetak ke PDF Rapi (Rekomendasi)</button>
+            <button class="btn-download-pdf" onclick="downloadPDF()">📥 Download PDF Langsung</button>
+        </div>
+    </div>
+
+    <script>
+        function downloadPDF() {
+            const element = document.getElementById('invoice-content');
+            const actions = document.querySelector('.actions');
+            
+            actions.style.display = 'none';
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     'Invoice_Staffpedia_Manov_Barbershop.pdf',
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { scale: 2.5, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: 900 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                actions.style.display = 'flex';
+            }).catch(err => {
+                actions.style.display = 'flex';
+                window.print();
+            });
+        }
+    </script>
+</body>
+</html>

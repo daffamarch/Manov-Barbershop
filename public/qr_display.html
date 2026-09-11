@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Standee - Manov Barbershop</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 36px 28px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+
+        .brand-logo {
+            font-size: 22px;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+            margin-bottom: 24px;
+        }
+
+        .qr-wrapper {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .qr-wrapper img {
+            width: 240px;
+            height: 240px;
+            display: block;
+        }
+
+        .callout-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .callout-desc {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .url-box {
+            background: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #2563eb;
+            font-weight: 700;
+            border: 1px dashed #93c5fd;
+            word-break: break-all;
+            margin-bottom: 24px;
+        }
+
+        .btn-print {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .btn-print:hover {
+            background: #1d4ed8;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #cbd5e1;
+                margin: auto;
+            }
+            .btn-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="brand-logo">MANOV BARBERSHOP</div>
+        <div class="brand-subtitle">Kartu Kepuasan & Ulasan Pelanggan</div>
+
+        <div class="qr-wrapper">
+            <img src="qr-code.png" alt="QR Code Manov Barbershop">
+        </div>
+
+        <div class="callout-title">Scan QR Ini Untuk Beri Ulasan</div>
+        <div class="callout-desc">Bantu kami meningkatkan kualitas layanan, kebersihan, dan hasil potongan rambut Anda.</div>
+
+        <div class="url-box">
+            https://manov-barbershop.vercel.app/
+        </div>
+
+        <button class="btn-print" onclick="window.print()">🖨️ Cetak Kartu Meja (Standee)</button>
+    </div>
+
+</body>
+</html>

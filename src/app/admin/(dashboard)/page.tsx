@@ -52,6 +52,7 @@ export default async function AdminDashboardPage() {
   let data = null
   let isOffline = false
   let errorMessage = ""
+  let rawMsg = ""
 
   try {
     const res = await supabase
@@ -61,13 +62,19 @@ export default async function AdminDashboardPage() {
 
     if (res.error) {
       isOffline = true
-      errorMessage = res.error.message
+      rawMsg = (res.error as any)?.message || String(res.error)
     } else {
       data = res.data
     }
   } catch (err: any) {
     isOffline = true
-    errorMessage = err?.message || "TypeError: fetch failed"
+    rawMsg = err?.message || "TypeError: fetch failed"
+  }
+
+  if (rawMsg.includes("<!DOCTYPE") || rawMsg.includes("<html") || rawMsg.includes("522")) {
+    errorMessage = "522 Connection Timed Out (Project Supabase Sedang Di-Pause)"
+  } else {
+    errorMessage = rawMsg.slice(0, 150)
   }
 
   // Filter out deleted IDs stored in server cookies so deleted items never return on refresh or relog
